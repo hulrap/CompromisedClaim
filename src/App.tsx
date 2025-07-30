@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AlertCircle, Shield, ArrowRight, CheckCircle2, Loader2, Calculator } from 'lucide-react';
+import { AlertCircle, Shield, ArrowRight, CheckCircle2, Loader2, Calculator, Lock, Zap, Eye, Target } from 'lucide-react';
 import { ethers } from 'ethers';
 import { LXPRescueService } from './rescue-service';
 import { Validator } from './validator';
@@ -68,319 +68,382 @@ function App() {
   const isFormValid = compromisedAddress && compromisedKey && safeAddress && safeKey && tokenAmount;
 
   return (
-    <div className="min-h-screen py-8">
-      <div className="max-w-4xl mx-auto px-6 space-y-6">
-        <div className="glass-card rounded-xl p-8">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-full linea-gradient">
-              <Shield className="h-8 w-8 text-white" />
+    <div className="min-h-screen relative w-full">
+      {/* Floating orbs for visual appeal */}
+      <div className="floating-orb"></div> 
+      <div className="floating-orb"></div>
+      <div className="floating-orb"></div>
+
+      <div className="relative z-10 w-full">
+        {/* Hero Section */}
+        <div className="container mx-auto px-6 pt-12 pb-8">
+          <div className="text-center mb-12 animate-slide-up">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full linea-gradient mb-6 pulse-glow">
+              <Shield className="w-10 h-10 text-white" />
             </div>
-            <div>
-              <h1 className="text-4xl font-bold linea-text">LINEA Token Claim Tool</h1>
-              <p className="text-gray-700 mt-2 text-lg">
-                Safely claim LINEA tokens from compromised wallets using atomic bundle transactions
-              </p>
-            </div>
+            <h1 className="text-6xl font-bold mb-4 text-shadow">
+              <span className="text-white">LINEA Token</span>
+              <br />
+              <span className="linea-text">Claim Rescue</span>
+            </h1>
+            <p className="text-xl text-white/80 max-w-2xl mx-auto leading-relaxed">
+              Safely claim your LINEA token allocation from compromised wallets using atomic bundle transactions that bypass sweeper bots
+            </p>
+          </div>
+
+          {/* Security Features */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16">
+            {[
+              { icon: Eye, title: 'Invisible', desc: 'Bypass mempool monitoring' },
+              { icon: Zap, title: 'Atomic', desc: 'All-or-nothing execution' },
+              { icon: Lock, title: 'Secure', desc: 'Client-side key handling' },
+              { icon: Target, title: 'Precise', desc: 'Optimized gas pricing' }
+            ].map((feature) => (
+              <div key={feature.title} className="glass-card card-hover rounded-2xl p-6 text-center">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/10 mb-4">
+                  <feature.icon className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-white font-semibold mb-2">{feature.title}</h3>
+                <p className="text-white/60 text-sm">{feature.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
 
-        <div className="glass-card rounded-xl p-6 border-l-4 border-amber-400">
-          <div className="flex items-start gap-4">
-            <div className="p-2 rounded-full bg-amber-100">
-              <AlertCircle className="h-5 w-5 text-amber-600" />
+        {/* Main Content */}
+        <div className="container mx-auto px-6 max-w-6xl">
+          {/* Warning Notice */}
+          <div className="glass-card rounded-2xl p-8 mb-12 border-l-4 border-amber-400 card-hover">
+            <div className="flex items-start gap-6">
+              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center">
+                <AlertCircle className="w-6 h-6 text-amber-400" />
+              </div>
+              <div>
+                <h3 className="text-white font-bold text-xl mb-3">Critical Security Notice</h3>
+                <p className="text-white/80 text-lg leading-relaxed">
+                  This tool uses atomic bundle transactions submitted directly to Linea's sequencer. All three transactions 
+                  (fund gas → claim tokens → transfer to safety) execute together in a single block, making them invisible 
+                  to sweeper bots until completion.
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-gray-900 font-semibold text-lg">Security Notice</p>
-              <p className="text-gray-700 mt-2">
-                This tool uses atomic bundle transactions to bypass sweeper bots. All transactions execute together atomically, preventing front-running attacks on compromised wallets.
-              </p>
+          </div>
+
+          {/* Main Interface Card */}
+          <div className="glass-card rounded-3xl overflow-hidden mb-12 card-hover">
+            {/* Tab Navigation */}
+            <div className="bg-white/5 border-b border-white/10 px-8 py-6">
+              <nav className="flex space-x-8">
+                {[
+                  { id: 'rescue', label: 'Claim Tokens', icon: Shield },
+                  { id: 'how', label: 'How It Works', icon: Eye }
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as 'rescue' | 'how')}
+                    className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                      activeTab === tab.id
+                        ? 'bg-white/10 text-white border border-white/20'
+                        : 'text-white/60 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <tab.icon className="w-5 h-5" />
+                    {tab.label}
+                  </button>
+                ))}
+              </nav>
             </div>
+
+            {/* Tab Content */}
+            {activeTab === 'rescue' && (
+              <div className="p-12 space-y-12">
+                {/* Wallet Inputs Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                  {/* Compromised Wallet */}
+                  <div className="space-y-8">
+                    <div className="flex items-center gap-4">
+                      <div className="w-4 h-4 bg-red-500 rounded-full"></div>
+                      <h3 className="text-2xl font-bold text-white">Compromised Wallet</h3>
+                    </div>
+                    
+                    <div className="space-y-6">
+                      <div>
+                        <label htmlFor="compromised-address" className="block text-white/80 font-medium mb-3 text-lg">Wallet Address</label>
+                        <input
+                          id="compromised-address"
+                          type="text"
+                          placeholder="0x..."
+                          value={compromisedAddress}
+                          onChange={(e) => setCompromisedAddress(e.target.value)}
+                          className="glass-input w-full text-lg"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label htmlFor="compromised-key" className="block text-white/80 font-medium mb-3 text-lg">Private Key</label>
+                        <input
+                          id="compromised-key"
+                          type="password"
+                          placeholder="Never share this elsewhere"
+                          value={compromisedKey}
+                          onChange={(e) => setCompromisedKey(e.target.value)}
+                          className="glass-input w-full text-lg"
+                        />
+                        <p className="text-white/50 text-sm mt-2">
+                          Required to sign rescue transactions. Processed client-side only.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Safe Wallet */}
+                  <div className="space-y-8">
+                    <div className="flex items-center gap-4">
+                      <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                      <h3 className="text-2xl font-bold text-white">Safe Destination</h3>
+                    </div>
+                    
+                    <div className="space-y-6">
+                      <div>
+                        <label htmlFor="safe-address" className="block text-white/80 font-medium mb-3 text-lg">Safe Wallet Address</label>
+                        <input
+                          id="safe-address"
+                          type="text"
+                          placeholder="0x..."
+                          value={safeAddress}
+                          onChange={(e) => setSafeAddress(e.target.value)}
+                          className="glass-input w-full text-lg"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label htmlFor="safe-key" className="block text-white/80 font-medium mb-3 text-lg">Safe Wallet Private Key</label>
+                        <input
+                          id="safe-key"
+                          type="password"
+                          placeholder="For funding gas fees"
+                          value={safeKey}
+                          onChange={(e) => setSafeKey(e.target.value)}
+                          className="glass-input w-full text-lg"
+                        />
+                        <p className="text-white/50 text-sm mt-2">
+                          Needed to fund gas for the atomic bundle transaction.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Token Amount Section */}
+                <div className="max-w-md mx-auto">
+                  <div className="gradient-border">
+                    <div className="gradient-border-inner p-8 text-center">
+                      <div className="flex items-center justify-center gap-3 mb-6">
+                        <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
+                        <h3 className="text-xl font-bold text-white">Token Allocation</h3>
+                      </div>
+                      
+                      <div>
+                        <label htmlFor="token-amount" className="block text-white/80 font-medium mb-4 text-lg">LINEA Token Amount</label>
+                        <input
+                          id="token-amount"
+                          type="text"
+                          placeholder="1000.0"
+                          value={tokenAmount}
+                          onChange={(e) => setTokenAmount(e.target.value)}
+                          className="glass-input w-full text-xl text-center font-semibold"
+                        />
+                        <p className="text-white/60 mt-3">
+                          Enter your LINEA token allocation amount to claim
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Transaction Preview */}
+                <div className="bg-gradient-to-br from-white/5 to-white/10 rounded-3xl p-10 border border-white/20">
+                  <h3 className="text-2xl font-bold text-white mb-8 text-center">Atomic Bundle Execution</h3>
+                  
+                  <div className="flex flex-col lg:flex-row items-center justify-center gap-8">
+                    {[
+                      { num: 1, title: 'Fund Gas', desc: 'ETH → Compromised Wallet', color: 'from-green-400 to-emerald-600' },
+                      { num: 2, title: 'Claim Tokens', desc: 'Execute LINEA Claim', color: 'from-blue-400 to-purple-600' },
+                      { num: 3, title: 'Transfer Safe', desc: 'Tokens → Safe Wallet', color: 'from-purple-400 to-pink-600' }
+                    ].map((step) => (
+                      <div key={step.title} className="flex items-center gap-6 step-line">
+                        <div className="glass-card rounded-2xl p-6 text-center min-w-[200px] card-hover">
+                          <div className={`w-12 h-12 rounded-full bg-gradient-to-r ${step.color} flex items-center justify-center mx-auto mb-4 text-white font-bold text-lg`}>
+                            {step.num}
+                          </div>
+                          <h4 className="text-white font-semibold mb-2">{step.title}</h4>
+                          <p className="text-white/60 text-sm">{step.desc}</p>
+                        </div>
+                        {step.num < 3 && (
+                          <ArrowRight className="w-8 h-8 text-white/40 hidden lg:block" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-6 max-w-2xl mx-auto">
+                  <button
+                    onClick={handleEstimate}
+                    disabled={!isFormValid || status === 'estimating'}
+                    className="flex items-center justify-center gap-3 px-8 py-4 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-semibold transition-all duration-300 border border-white/20 hover:border-white/40 disabled:opacity-50"
+                  >
+                    {status === 'estimating' ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Calculator className="w-5 h-5" />
+                    )}
+                    Estimate Gas Cost
+                  </button>
+                  
+                  <button
+                    onClick={handleRescue}
+                    disabled={!isFormValid || status === 'processing'}
+                    className="flex items-center justify-center gap-3 px-8 py-4 linea-gradient text-white rounded-2xl font-bold text-lg shadow-2xl hover:scale-105 transition-all duration-300 disabled:opacity-50 flex-1"
+                  >
+                    {(() => {
+                      if (status === 'processing') {
+                        return (
+                          <>
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            Executing Bundle...
+                          </>
+                        );
+                      }
+                      if (status === 'success') {
+                        return (
+                          <>
+                            <CheckCircle2 className="w-5 h-5" />
+                            Claim Complete!
+                          </>
+                        );
+                      }
+                      return (
+                        <>
+                          <Shield className="w-5 h-5" />
+                          Execute Claim Bundle
+                        </>
+                      );
+                    })()}
+                  </button>
+                </div>
+
+                {/* Results */}
+                {result.gasEstimate && (
+                  <div className="glass-card rounded-2xl p-6 max-w-md mx-auto text-center border border-blue-400/50">
+                    <h4 className="text-white font-semibold text-lg mb-2">Gas Estimate</h4>
+                    <p className="text-blue-400 text-2xl font-bold">{result.gasEstimate} ETH</p>
+                    <p className="text-white/60 text-sm mt-2">Required for bundle execution</p>
+                  </div>
+                )}
+
+                {status === 'success' && result.bundleHash && (
+                  <div className="glass-card rounded-2xl p-8 border border-green-400/50 card-hover">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
+                        <CheckCircle2 className="w-6 h-6 text-green-400" />
+                      </div>
+                      <div>
+                        <h4 className="text-white font-bold text-xl">Success!</h4>
+                        <p className="text-green-400">Your LINEA tokens have been claimed successfully!</p>
+                      </div>
+                    </div>
+                    <div className="bg-black/20 rounded-xl p-4 mt-4">
+                      <p className="text-white/60 text-sm mb-1">Bundle Hash:</p>
+                      <p className="text-white font-mono text-sm break-all">{result.bundleHash}</p>
+                    </div>
+                  </div>
+                )}
+
+                {status === 'error' && result.error && (
+                  <div className="glass-card rounded-2xl p-8 border border-red-400/50 card-hover">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+                        <AlertCircle className="w-6 h-6 text-red-400" />
+                      </div>
+                      <div>
+                        <h4 className="text-white font-bold text-xl">Error</h4>
+                        <p className="text-red-400">{result.error}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'how' && (
+              <div className="p-12 space-y-10">
+                <div className="text-center mb-12">
+                  <h2 className="text-3xl font-bold text-white mb-4">How Atomic Bundle Transactions Work</h2>
+                  <p className="text-white/80 text-lg">Understanding the technology behind sweeper bot protection</p>
+                </div>
+
+                <div className="space-y-12">
+                  <div className="glass-card rounded-2xl p-8 card-hover">
+                    <h3 className="text-xl font-bold text-white mb-4">The Problem</h3>
+                    <p className="text-white/80 leading-relaxed">
+                      When a wallet's private key is compromised, malicious "sweeper bots" continuously monitor it. 
+                      These bots immediately steal any ETH sent to the wallet for gas fees, creating an impossible 
+                      situation where users cannot execute transactions to claim their rightful tokens.
+                    </p>
+                  </div>
+
+                  <div className="glass-card rounded-2xl p-8 card-hover">
+                    <h3 className="text-xl font-bold text-white mb-4">The Solution</h3>
+                    <p className="text-white/80 leading-relaxed mb-6">
+                      Linea's <code className="bg-black/30 px-2 py-1 rounded text-blue-400">eth_sendBundle</code> API 
+                      allows us to submit multiple transactions that execute atomically (all-or-nothing) while bypassing 
+                      the public mempool where bots monitor for transactions.
+                    </p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {[
+                        { title: 'Direct Sequencer Access', desc: 'Transactions bypass the public mempool entirely' },
+                        { title: 'Atomic Execution', desc: 'All transactions execute together in one block' },
+                        { title: 'All-or-Nothing', desc: 'Either everything succeeds or nothing happens' },
+                        { title: 'Zero Visibility', desc: 'Bots cannot see transactions before execution' }
+                      ].map((feature) => (
+                        <div key={feature.title} className="bg-white/5 rounded-xl p-4">
+                          <h4 className="text-white font-semibold mb-2">{feature.title}</h4>
+                          <p className="text-white/60 text-sm">{feature.desc}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="glass-card rounded-2xl p-8 card-hover">
+                    <h3 className="text-xl font-bold text-white mb-6">Security Features</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      {[
+                        { icon: Lock, title: 'Client-Side Security', desc: 'Private keys never leave your browser' },
+                        { icon: Zap, title: 'MEV Protection', desc: 'Immune to front-running and sandwich attacks' },
+                        { icon: Target, title: 'Gas Optimization', desc: 'Precise calculations prevent failures' }
+                      ].map((feature) => (
+                        <div key={feature.title} className="text-center">
+                          <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4">
+                            <feature.icon className="w-8 h-8 text-white" />
+                          </div>
+                          <h4 className="text-white font-semibold mb-2">{feature.title}</h4>
+                          <p className="text-white/60 text-sm">{feature.desc}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="glass-card rounded-xl overflow-hidden">
-          <div className="border-b border-gray-200/50">
-            <nav className="flex space-x-8 px-8">
-              <button
-                onClick={() => setActiveTab('rescue')}
-                className={`py-4 px-2 border-b-2 font-semibold text-sm transition-colors ${
-                  activeTab === 'rescue'
-                    ? 'border-purple-500 text-purple-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                Claim Tokens
-              </button>
-              <button
-                onClick={() => setActiveTab('how')}
-                className={`py-4 px-2 border-b-2 font-semibold text-sm transition-colors ${
-                  activeTab === 'how'
-                    ? 'border-purple-500 text-purple-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                How It Works
-              </button>
-            </nav>
-          </div>
-
-          {activeTab === 'rescue' && (
-            <div className="p-8 space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                  <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                    Compromised Wallet
-                  </h3>
-                  <div>
-                    <label htmlFor="compromised-address" className="block text-sm font-medium text-gray-700 mb-1">
-                      Wallet Address
-                    </label>
-                    <input
-                      id="compromised-address"
-                      type="text"
-                      placeholder="0x..."
-                      value={compromisedAddress}
-                      onChange={(e) => setCompromisedAddress(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="compromised-key" className="block text-sm font-medium text-gray-700 mb-1">
-                      Private Key
-                    </label>
-                    <input
-                      id="compromised-key"
-                      type="password"
-                      placeholder="Never share this elsewhere"
-                      value={compromisedKey}
-                      onChange={(e) => setCompromisedKey(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Required to sign rescue transactions. Not stored or transmitted.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    Safe Destination
-                  </h3>
-                  <div>
-                    <label htmlFor="safe-address" className="block text-sm font-medium text-gray-700 mb-1">
-                      Safe Wallet Address
-                    </label>
-                    <input
-                      id="safe-address"
-                      type="text"
-                      placeholder="0x..."
-                      value={safeAddress}
-                      onChange={(e) => setSafeAddress(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="safe-key" className="block text-sm font-medium text-gray-700 mb-1">
-                      Safe Wallet Private Key
-                    </label>
-                    <input
-                      id="safe-key"
-                      type="password"
-                      placeholder="For funding gas"
-                      value={safeKey}
-                      onChange={(e) => setSafeKey(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Needed to fund gas for the bundle transaction.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="gradient-border max-w-md">
-                <div className="gradient-border-inner p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    Token Allocation
-                  </h3>
-                  <div>
-                    <label htmlFor="token-amount" className="block text-sm font-medium text-gray-700 mb-2">
-                      LINEA Token Amount
-                    </label>
-                    <input
-                      id="token-amount"
-                      type="text"
-                      placeholder="1000.0"
-                      value={tokenAmount}
-                      onChange={(e) => setTokenAmount(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                    />
-                    <p className="text-sm text-gray-600 mt-2">
-                      Enter your LINEA token allocation amount to claim
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-xl p-8 border border-slate-200">
-                <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                  <div className="p-2 rounded-full bg-blue-100">
-                    <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
-                  </div>
-                  Atomic Transaction Bundle
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-6 p-4 bg-white/80 backdrop-blur-sm rounded-xl border border-white/50 shadow-sm">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-green-400 to-green-600 text-white font-bold text-sm">
-                      1
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-gray-900">Fund Gas</p>
-                      <p className="text-sm text-gray-600">Send ETH to compromised wallet for transaction fees</p>
-                    </div>
-                    <ArrowRight className="h-5 w-5 text-gray-400" />
-                  </div>
-                  
-                  <div className="flex items-center gap-6 p-4 bg-white/80 backdrop-blur-sm rounded-xl border border-white/50 shadow-sm">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-blue-400 to-purple-600 text-white font-bold text-sm">
-                      2
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-gray-900">Claim LINEA</p>
-                      <p className="text-sm text-gray-600">Execute LINEA token claim from compromised wallet</p>
-                    </div>
-                    <ArrowRight className="h-5 w-5 text-gray-400" />
-                  </div>
-                  
-                  <div className="flex items-center gap-6 p-4 bg-white/80 backdrop-blur-sm rounded-xl border border-white/50 shadow-sm">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-emerald-400 to-teal-600 text-white font-bold text-sm">
-                      3
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-gray-900">Transfer to Safety</p>
-                      <p className="text-sm text-gray-600">Move claimed LINEA tokens to your secure wallet</p>
-                    </div>
-                    <CheckCircle2 className="h-5 w-5 text-green-600" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-6">
-                <button
-                  onClick={handleEstimate}
-                  disabled={!isFormValid || status === 'estimating'}
-                  className="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-xl hover:from-slate-700 hover:to-slate-800 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg transition-all duration-200 hover:shadow-xl"
-                >
-                  {status === 'estimating' ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : (
-                    <Calculator className="h-5 w-5" />
-                  )}
-                  Estimate Gas
-                </button>
-                
-                <button
-                  onClick={handleRescue}
-                  disabled={!isFormValid || status === 'processing'}
-                  className="flex items-center gap-3 px-8 py-4 linea-gradient text-white rounded-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex-1 font-bold shadow-lg transition-all duration-200 hover:shadow-xl"
-                >
-{(() => {
-                    if (status === 'processing') {
-                      return (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Executing Bundle...
-                        </>
-                      );
-                    }
-                    if (status === 'success') {
-                      return (
-                        <>
-                          <CheckCircle2 className="h-4 w-4" />
-                          Claim Complete!
-                        </>
-                      );
-                    }
-                    return 'Execute Claim Bundle';
-                  })()}
-                </button>
-              </div>
-
-              {result.gasEstimate && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <p className="text-blue-800 font-medium">Gas Estimate</p>
-                  <p className="text-blue-700 text-sm mt-1">
-                    Estimated ETH needed: {result.gasEstimate} ETH
-                  </p>
-                </div>
-              )}
-
-              {status === 'success' && result.bundleHash && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <div className="flex items-start gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
-                    <div>
-                      <p className="text-green-800 font-medium">Success!</p>
-                      <p className="text-green-700 text-sm mt-1">
-                        Your LINEA tokens have been claimed successfully! Bundle Hash: {result.bundleHash}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {status === 'error' && result.error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
-                    <div>
-                      <p className="text-red-800 font-medium">Error</p>
-                      <p className="text-red-700 text-sm mt-1">{result.error}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'how' && (
-            <div className="p-6 space-y-6">
-              <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-gray-900">How Bundle Transactions Work</h3>
-                
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-2">The Problem:</h4>
-                    <p className="text-gray-600 text-sm">
-                      When a wallet's private key is compromised, bots monitor it and immediately steal any ETH sent to it. 
-                      This makes it impossible to pay for gas to move tokens out.
-                    </p>
-                  </div>
-
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-2">The Solution:</h4>
-                    <p className="text-gray-600 text-sm">
-                      Linea's `eth_sendBundle` API allows us to submit multiple transactions that execute atomically 
-                      (all-or-nothing) while bypassing the public mempool where bots lurk.
-                    </p>
-                  </div>
-
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-2">Security Features:</h4>
-                    <ul className="list-disc list-inside text-gray-600 text-sm space-y-1">
-                      <li>Transactions bypass the public mempool</li>
-                      <li>All transactions execute together or not at all</li>
-                      <li>Bots cannot see or front-run the transactions</li>
-                      <li>Gas is funded and used in the same atomic operation</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+        {/* Footer */}
+        <div className="text-center py-12 text-white/60">
+          <p>Built with Linea's eth_sendBundle API • Secure • Atomic • Invisible to Bots</p>
         </div>
       </div>
     </div>
