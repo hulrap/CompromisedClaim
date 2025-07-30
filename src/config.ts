@@ -22,9 +22,9 @@ export const SERVICE_CONFIG = {
   LINEA_TOKEN_CONTRACT: import.meta.env.VITE_LINEA_TOKEN_CONTRACT,
   LINEA_CLAIM_CONTRACT: import.meta.env.VITE_LINEA_CLAIM_CONTRACT,
   
-  // Allocation API
+  // Allocation API - Disabled for manual input only
   ALLOCATION_API_URL: import.meta.env.VITE_LINEA_ALLOCATION_API_URL || 'https://api.linea.build/allocations',
-  ENABLE_AUTO_ALLOCATION: import.meta.env.VITE_ENABLE_AUTO_ALLOCATION_DETECTION === 'true',
+  ENABLE_AUTO_ALLOCATION: false,
   
   // Gas Settings - Critical for LINEA token launch
   GAS_SETTINGS: {
@@ -35,13 +35,13 @@ export const SERVICE_CONFIG = {
     MANUAL_GAS_PRICE_GWEI: Number(import.meta.env.VITE_MANUAL_GAS_PRICE_GWEI) || 100,
   },
   
-  // Claim Configuration - Choose your claim mode
+  // Claim Configuration - Force manual input only
   CLAIM_CONFIG: {
-    // Claim modes (choose one)
-    USE_AUTO_DETECTION: import.meta.env.VITE_USE_AUTO_DETECTION === 'true',
-    USE_USER_INPUT_AMOUNT: import.meta.env.VITE_USE_USER_INPUT_AMOUNT === 'true',
-    USE_CLAIM_ALL_MODE: import.meta.env.VITE_USE_CLAIM_ALL_MODE === 'true',
-    USE_MERKLE_PROOF_MODE: import.meta.env.VITE_USE_MERKLE_PROOF_MODE === 'true',
+    // Only user input mode is enabled - no automatic detection
+    USE_AUTO_DETECTION: false,
+    USE_USER_INPUT_AMOUNT: true,
+    USE_CLAIM_ALL_MODE: false,
+    USE_MERKLE_PROOF_MODE: false,
     
     // Function signatures for different claim contract types
     SIMPLE_CLAIM_SIGNATURE: 'claim(uint256 amount)',

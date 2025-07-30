@@ -75,10 +75,9 @@ describe('Validator', () => {
         .toThrow('Compromised and safe addresses cannot be the same');
     });
 
-    it('should throw for private key without 0x prefix', () => {
+    it('should normalize private key without 0x prefix', () => {
       const config = { ...validConfig, compromisedPrivateKey: '1111111111111111111111111111111111111111111111111111111111111111' };
-      expect(() => Validator.validateConfig(config))
-        .toThrow('Invalid compromised private key format');
+      expect(() => Validator.validateConfig(config)).not.toThrow();
     });
 
     it('should throw for mismatched private key and address', () => {

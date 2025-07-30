@@ -46,7 +46,7 @@ vi.mock('ethers', async () => {
         encodeFunctionData: vi.fn().mockReturnValue('0x1234567890abcdef'),
       })),
       Contract: vi.fn().mockImplementation(() => ({
-        hasClaimed: vi.fn(),
+        hasClaimed: vi.fn().mockResolvedValue(false),
       })),
     },
   };
