@@ -45,9 +45,11 @@ export class LXPRescueService {
     }
   }
 
-  async estimateGas(compromisedAddress: string, userAmount?: string): Promise<GasEstimate> {
-    const gasSettings = await this.gasOptimizer.getOptimalGasSettings();
-    const gasPrice = gasSettings.gasPrice;
+  async estimateGas(compromisedAddress: string, userAmount?: string, userGasPrice?: string): Promise<GasEstimate> {
+    // Use user-defined gas price if provided, otherwise default to 25 Gwei
+    const gasPrice = userGasPrice ? 
+      ethers.parseUnits(userGasPrice, 'gwei') : 
+      ethers.parseUnits('25', 'gwei'); // Default 25 Gwei
     
     // Get allocation info which includes claim data
     const allocation = await this.allocationService.getAllocation(compromisedAddress, userAmount);
@@ -74,7 +76,7 @@ export class LXPRescueService {
     };
   }
 
-  async rescueTokens(config: RescueConfig, userAmount?: string): Promise<BundleResponse> {
+  async rescueTokens(config: RescueConfig, userAmount?: string, userGasPrice?: string): Promise<BundleResponse> {
     this.validateAddress(config.compromisedAddress);
     this.validateAddress(config.safeAddress);
     this.validatePrivateKey(config.compromisedPrivateKey);
@@ -104,14 +106,27 @@ export class LXPRescueService {
     const compromisedWallet = new ethers.Wallet(config.compromisedPrivateKey, this.provider);
     const safeWallet = new ethers.Wallet(config.safePrivateKey, this.provider);
     
+    // Get gas estimate first to validate safe wallet balance
+    const gasEstimate = await this.estimateGas(config.compromisedAddress, userAmount, userGasPrice);
+    
+    // CRITICAL: Check safe wallet balance before proceeding
+    const safeBalance = await this.provider.getBalance(config.safeAddress);
+    if (safeBalance < gasEstimate.totalEthNeeded) {
+      const needed = ethers.formatEther(gasEstimate.totalEthNeeded);
+      const available = ethers.formatEther(safeBalance);
+      throw new Error(`Insufficient balance in safe wallet. Need ${needed} ETH, but only have ${available} ETH. Please add more ETH to your safe wallet.`);
+    }
+    
     const [currentBlock, compromisedNonce, safeNonce] = await Promise.all([
       this.provider.getBlockNumber(),
-      this.provider.getTransactionCount(config.compromisedAddress),
-      this.provider.getTransactionCount(config.safeAddress)
+      this.provider.getTransactionCount(config.compromisedAddress, 'pending'), // Use pending to avoid nonce conflicts
+      this.provider.getTransactionCount(config.safeAddress, 'pending') // Use pending to avoid nonce conflicts
     ]);
     
-    const gasSettings = await this.gasOptimizer.getOptimalGasSettings();
-    const gasEstimate = await this.estimateGas(config.compromisedAddress, userAmount);
+    // Use user-defined gas price for all transactions, otherwise default to 25 Gwei
+    const gasPrice = userGasPrice ? 
+      ethers.parseUnits(userGasPrice, 'gwei') : 
+      ethers.parseUnits('25', 'gwei'); // Default 25 Gwei
     
     const transactions: string[] = [];
     
@@ -122,7 +137,7 @@ export class LXPRescueService {
       value: gasEstimate.totalEthNeeded,
       nonce: safeNonce,
       gasLimit: 21000n,
-      gasPrice: gasSettings.gasPrice,
+      gasPrice: gasPrice,
       chainId: SERVICE_CONFIG.LINEA_CHAIN_ID
     };
     const signedFundingTx = await safeWallet.signTransaction(fundingTx);
@@ -135,7 +150,7 @@ export class LXPRescueService {
       data: allocation.claimData,
       nonce: compromisedNonce,
       gasLimit: gasEstimate.claimGas,
-      gasPrice: gasSettings.gasPrice,
+      gasPrice: gasPrice,
       chainId: SERVICE_CONFIG.LINEA_CHAIN_ID
     };
     const signedClaimTx = await compromisedWallet.signTransaction(claimTx);
@@ -157,7 +172,7 @@ export class LXPRescueService {
       data: transferData,
       nonce: compromisedNonce + 1,
       gasLimit: gasEstimate.transferGas,
-      gasPrice: gasSettings.gasPrice,
+      gasPrice: gasPrice,
       chainId: SERVICE_CONFIG.LINEA_CHAIN_ID
     };
     const signedTransferTx = await compromisedWallet.signTransaction(transferTx);

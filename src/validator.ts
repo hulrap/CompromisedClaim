@@ -64,4 +64,15 @@ export class Validator {
       throw new ValidationError('Invalid claim data format');
     }
   }
+
+  static validateGasPrice(gasPrice: string): void {
+    try {
+      const parsed = Number(gasPrice);
+      if (parsed <= 0 || parsed > 1000) {
+        throw new ValidationError('Gas price must be between 1 and 1000 Gwei');
+      }
+    } catch {
+      throw new ValidationError('Invalid gas price format');
+    }
+  }
 }

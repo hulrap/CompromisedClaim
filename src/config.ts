@@ -26,11 +26,13 @@ export const SERVICE_CONFIG = {
   ALLOCATION_API_URL: import.meta.env.VITE_LINEA_ALLOCATION_API_URL || 'https://api.linea.build/allocations',
   ENABLE_AUTO_ALLOCATION: import.meta.env.VITE_ENABLE_AUTO_ALLOCATION_DETECTION === 'true',
   
-  // Gas Settings
+  // Gas Settings - Critical for LINEA token launch
   GAS_SETTINGS: {
-    BASE_GAS_PRICE_GWEI: Number(import.meta.env.VITE_DEFAULT_GAS_PRICE_GWEI) || 20,
-    GAS_MULTIPLIER: Number(import.meta.env.VITE_GAS_MULTIPLIER) || 1.2,
-    MAX_GAS_PRICE_GWEI: Number(import.meta.env.VITE_MAX_GAS_PRICE_GWEI) || 100,
+    BASE_GAS_PRICE_GWEI: Number(import.meta.env.VITE_DEFAULT_GAS_PRICE_GWEI) || 50,
+    GAS_MULTIPLIER: Number(import.meta.env.VITE_GAS_MULTIPLIER) || 1.5,
+    MAX_GAS_PRICE_GWEI: Number(import.meta.env.VITE_MAX_GAS_PRICE_GWEI) || 200,
+    FORCE_MANUAL_GAS: import.meta.env.VITE_FORCE_MANUAL_GAS_PRICE === 'true',
+    MANUAL_GAS_PRICE_GWEI: Number(import.meta.env.VITE_MANUAL_GAS_PRICE_GWEI) || 100,
   },
   
   // Claim Configuration - Choose your claim mode

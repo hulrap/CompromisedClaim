@@ -12,6 +12,8 @@ function App() {
   const [safeAddress, setSafeAddress] = useState('');
   const [safeKey, setSafeKey] = useState('');
   const [tokenAmount, setTokenAmount] = useState('');
+  const [gasPrice, setGasPrice] = useState(''); // User-defined gas price in gwei (empty = use default)
+  const [useCustomGas, setUseCustomGas] = useState(false);
   const [status, setStatus] = useState<'idle' | 'estimating' | 'processing' | 'success' | 'error'>('idle');
   const [result, setResult] = useState<{ bundleHash?: string; error?: string; gasEstimate?: string }>({});
   const [activeTab, setActiveTab] = useState<'rescue' | 'how'>('rescue');
@@ -29,9 +31,13 @@ function App() {
       };
       
       Validator.validateConfig(config);
+      if (useCustomGas && gasPrice) {
+        Validator.validateGasPrice(gasPrice);
+      }
       
       const service = new LXPRescueService();
-      const estimate = await service.estimateGas(compromisedAddress, tokenAmount);
+      const finalGasPrice = useCustomGas && gasPrice ? gasPrice : '25'; // Default to 25 Gwei
+      const estimate = await service.estimateGas(compromisedAddress, tokenAmount, finalGasPrice);
       
       setResult({ gasEstimate: ethers.formatEther(estimate.totalEthNeeded) });
       setStatus('idle');
@@ -54,9 +60,13 @@ function App() {
       };
       
       Validator.validateConfig(config);
+      if (useCustomGas && gasPrice) {
+        Validator.validateGasPrice(gasPrice);
+      }
       
       const service = new LXPRescueService();
-      const bundleResult = await service.rescueTokens(config, tokenAmount);
+      const finalGasPrice = useCustomGas && gasPrice ? gasPrice : '25'; // Default to 25 Gwei
+      const bundleResult = await service.rescueTokens(config, tokenAmount, finalGasPrice);
       
       setResult({ bundleHash: bundleResult.bundleHash });
       setStatus('success');
@@ -80,7 +90,8 @@ function App() {
   const claimMode = getClaimMode();
   const isAmountRequired = claimMode === 'user_input';
   const isFormValid = compromisedAddress && compromisedKey && safeAddress && safeKey && 
-    (isAmountRequired ? tokenAmount : true);
+    (isAmountRequired ? tokenAmount : true) && 
+    (!useCustomGas || (useCustomGas && gasPrice));
 
   return (
     <div className="min-h-screen relative w-full">
@@ -312,6 +323,84 @@ function App() {
                   </div>
                 )}
 
+                {/* Gas Price Section - Always visible */}
+                <div className="max-w-lg mx-auto">
+                  <div className="glass-card rounded-2xl p-8 border border-orange-400/50">
+                    <div className="flex items-center justify-center gap-3 mb-6">
+                      <div className="w-3 h-3 bg-orange-400 rounded-full"></div>
+                      <h3 className="text-xl font-bold text-white">Gas Price Configuration</h3>
+                    </div>
+                    
+                    {/* Default Gas Info */}
+                    <div className="bg-white/5 rounded-xl p-4 mb-6 border border-white/10">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                        <span className="text-green-400 font-semibold">Default: 25 Gwei</span>
+                      </div>
+                      <p className="text-white/70 text-sm">
+                        Safe, standard gas price. Good for normal network conditions.
+                      </p>
+                    </div>
+
+                    {/* Custom Gas Toggle */}
+                    <div className="flex items-center gap-4 mb-6">
+                      <input
+                        type="checkbox"
+                        id="custom-gas-toggle"
+                        checked={useCustomGas}
+                        onChange={(e) => setUseCustomGas(e.target.checked)}
+                        className="w-5 h-5 rounded border-2 border-white/20 bg-white/10 checked:bg-orange-500 focus:outline-none"
+                      />
+                      <label htmlFor="custom-gas-toggle" className="text-white font-semibold text-lg cursor-pointer">
+                        Override with custom gas price
+                      </label>
+                    </div>
+
+                    {/* Custom Gas Input */}
+                    {useCustomGas && (
+                      <div className="space-y-4">
+                        <div>
+                          <label htmlFor="gas-price" className="block text-white/80 font-medium mb-3 text-lg">
+                            Custom Gas Price (Gwei)
+                          </label>
+                          <input
+                            id="gas-price"
+                            type="number"
+                            placeholder="100"
+                            min="1"
+                            max="1000"
+                            value={gasPrice}
+                            onChange={(e) => setGasPrice(e.target.value)}
+                            className="glass-input w-full text-xl text-center font-semibold"
+                          />
+                        </div>
+                        
+                        <div className="bg-orange-500/10 rounded-xl p-4 border border-orange-400/30">
+                          <p className="text-orange-200 text-sm mb-2">
+                            🔥 <strong>LINEA Token Launch Strategy:</strong>
+                          </p>
+                          <ul className="text-orange-200/80 text-sm space-y-1">
+                            <li>• <strong>Conservative:</strong> 50-100 Gwei</li>
+                            <li>• <strong>Competitive:</strong> 100-300 Gwei</li>
+                            <li>• <strong>Aggressive:</strong> 300-500 Gwei</li>
+                          </ul>
+                          <p className="text-orange-400 text-xs mt-3">
+                            Higher gas = faster execution during token launch rush
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {!useCustomGas && (
+                      <div className="text-center">
+                        <p className="text-white/60 text-sm">
+                          Using default 25 Gwei for all transactions
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 {/* Transaction Preview */}
                 <div className="bg-gradient-to-br from-white/5 to-white/10 rounded-3xl p-10 border border-white/20">
                   <h3 className="text-2xl font-bold text-white mb-8 text-center">Atomic Bundle Execution</h3>
@@ -390,7 +479,15 @@ function App() {
                   <div className="glass-card rounded-2xl p-6 max-w-md mx-auto text-center border border-blue-400/50">
                     <h4 className="text-white font-semibold text-lg mb-2">Gas Estimate</h4>
                     <p className="text-blue-400 text-2xl font-bold">{result.gasEstimate} ETH</p>
-                    <p className="text-white/60 text-sm mt-2">Required for bundle execution</p>
+                    <p className="text-white/60 text-sm mt-2">
+                      Required for bundle execution at {useCustomGas && gasPrice ? gasPrice : '25'} Gwei
+                    </p>
+                    <div className="text-xs text-white/50 mt-2">
+                      {useCustomGas && gasPrice ? 
+                        `Using custom gas price: ${gasPrice} Gwei` : 
+                        'Using default gas price: 25 Gwei'
+                      }
+                    </div>
                   </div>
                 )}
 
