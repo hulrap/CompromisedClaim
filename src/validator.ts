@@ -9,6 +9,12 @@ export class ValidationError extends Error {
 }
 
 export class Validator {
+  // Helper function to normalize private keys
+  static normalizePrivateKey(key: string): string {
+    if (!key) return key;
+    return key.startsWith('0x') ? key : '0x' + key;
+  }
+
   static validateConfig(config: RescueConfig): void {
     if (!config.compromisedAddress || !ethers.isAddress(config.compromisedAddress)) {
       throw new ValidationError('Invalid compromised wallet address');
@@ -22,22 +28,22 @@ export class Validator {
       throw new ValidationError('Compromised and safe addresses cannot be the same');
     }
     
-    if (!config.compromisedPrivateKey?.startsWith('0x')) {
-      throw new ValidationError('Invalid compromised private key format');
-    }
-    
-    if (!config.safePrivateKey?.startsWith('0x')) {
-      throw new ValidationError('Invalid safe private key format');
-    }
-    
+    // Normalize private keys by adding 0x prefix if missing
+    const normalizePrivateKey = (key: string): string => {
+      if (!key) return key;
+      return key.startsWith('0x') ? key : '0x' + key;
+    };
+
+    const normalizedCompromisedKey = normalizePrivateKey(config.compromisedPrivateKey);
+    const normalizedSafeKey = normalizePrivateKey(config.safePrivateKey);
     
     try {
-      const compromisedWallet = new ethers.Wallet(config.compromisedPrivateKey);
+      const compromisedWallet = new ethers.Wallet(normalizedCompromisedKey);
       if (compromisedWallet.address.toLowerCase() !== config.compromisedAddress.toLowerCase()) {
         throw new ValidationError('Compromised private key does not match address');
       }
       
-      const safeWallet = new ethers.Wallet(config.safePrivateKey);
+      const safeWallet = new ethers.Wallet(normalizedSafeKey);
       if (safeWallet.address.toLowerCase() !== config.safeAddress.toLowerCase()) {
         throw new ValidationError('Safe private key does not match address');
       }
@@ -54,7 +60,8 @@ export class Validator {
         throw new ValidationError('Amount must be greater than 0');
       }
       return parsed;
-    } catch {
+    } catch (error) {
+      if (error instanceof ValidationError) throw error;
       throw new ValidationError('Invalid amount format');
     }
   }
@@ -66,6 +73,10 @@ export class Validator {
   }
 
   static validateGasPrice(gasPrice: string): void {
+    if (!gasPrice || gasPrice.trim() === '') {
+      throw new ValidationError('Gas price must be a valid number');
+    }
+    
     try {
       const parsed = Number(gasPrice);
       if (isNaN(parsed)) {

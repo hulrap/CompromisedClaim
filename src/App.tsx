@@ -40,9 +40,9 @@ function App() {
       
       const config: RescueConfig = {
         compromisedAddress,
-        compromisedPrivateKey: compromisedKey,
+        compromisedPrivateKey: Validator.normalizePrivateKey(compromisedKey),
         safeAddress,
-        safePrivateKey: safeKey
+        safePrivateKey: Validator.normalizePrivateKey(safeKey)
       };
       
       Validator.validateConfig(config);
@@ -78,9 +78,9 @@ function App() {
       
       const config: RescueConfig = {
         compromisedAddress,
-        compromisedPrivateKey: compromisedKey,
+        compromisedPrivateKey: Validator.normalizePrivateKey(compromisedKey),
         safeAddress,
-        safePrivateKey: safeKey
+        safePrivateKey: Validator.normalizePrivateKey(safeKey)
       };
       
       Validator.validateConfig(config);

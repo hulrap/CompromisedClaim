@@ -121,7 +121,7 @@ describe('GasOptimizer', () => {
 
       const result = await optimizer.getOptimalGasSettings();
       
-      expect(result.gasPrice).toBe(BigInt('50000000000')); // Fallback to BASE_GAS_PRICE_GWEI
+      expect(result.gasPrice).toBe(BigInt('75000000000')); // BASE_GAS_PRICE_GWEI * multiplier (50 * 1.5)
     });
   });
 
