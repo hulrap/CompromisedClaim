@@ -8,7 +8,7 @@ const requiredEnvVars = {
 // Validate required environment variables
 for (const [key, value] of Object.entries(requiredEnvVars)) {
   if (!value || value === '0x0000000000000000000000000000000000000000') {
-    console.warn(`⚠️  ${key} not configured. Please set in .env file.`);
+    console.warn(`${key} not configured. Please set in .env file.`);
   }
 }
 

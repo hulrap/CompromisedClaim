@@ -18,11 +18,11 @@ export class LXPRescueService {
     }
     
     if (!SERVICE_CONFIG.LINEA_CLAIM_CONTRACT || SERVICE_CONFIG.LINEA_CLAIM_CONTRACT === '0x0000000000000000000000000000000000000000') {
-      console.warn('⚠️  LINEA claim contract not configured. Set VITE_LINEA_CLAIM_CONTRACT in .env when available.');
+      console.warn('LINEA claim contract not configured. Set VITE_LINEA_CLAIM_CONTRACT in .env when available.');
     }
     
     if (!SERVICE_CONFIG.LINEA_TOKEN_CONTRACT || SERVICE_CONFIG.LINEA_TOKEN_CONTRACT === '0x0000000000000000000000000000000000000000') {
-      console.warn('⚠️  LINEA token contract not configured. Set VITE_LINEA_TOKEN_CONTRACT in .env when available.');
+      console.warn('LINEA token contract not configured. Set VITE_LINEA_TOKEN_CONTRACT in .env when available.');
     }
 
     this.infuraUrl = `${SERVICE_CONFIG.LINEA_RPC_URL}${SERVICE_CONFIG.INFURA_API_KEY}`;

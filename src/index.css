@@ -1,8 +1,27 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Linea Official Brand Colors */
+:root {
+  /* Official Linea colors */
+  --v2-color-navy: #190066;
+  --v2-color-cyan: #61dfff;
+  
+  /* Extended palette for decorations */
+  --linea-navy: var(--v2-color-navy);
+  --linea-navy-dark: #120050;
+  --linea-navy-light: #2a1a8a;
+  --linea-cyan: var(--v2-color-cyan);
+  --linea-cyan-light: #8fe7ff;
+  --linea-yellow: #FFD700;
+  --linea-orange: #FF8C00;
+  --linea-pink: #FF6B9D;
+  --linea-white: #FFFFFF;
+  --linea-gray: #8B8B9A;
+}
 
 @layer base {
   html {
@@ -14,7 +33,7 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #1e1b4b 100%);
+    background: var(--v2-color-navy);
     min-height: 100vh;
     position: relative;
     overflow-x: hidden;
@@ -27,20 +46,6 @@
     position: relative;
   }
 
-  body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: 
-      radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
-      radial-gradient(circle at 40% 40%, rgba(120, 200, 255, 0.2) 0%, transparent 50%);
-    pointer-events: none;
-    z-index: -1;
-  }
 
   * {
     scroll-behavior: smooth;
@@ -48,95 +53,267 @@
 }
 
 @layer components {
+  /* Linea cards matching official styling - solid white cards */
+  .linea-card {
+    background: #ffffff;
+    border: 1px solid #f0f0f0;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease;
+    color: #1a1a1a;
+  }
+
+  .linea-card h3,
+  .linea-card h4 {
+    color: #1a1a1a;
+  }
+
+  .linea-card p {
+    color: #666666;
+  }
+
+  /* Main interface card - subtle glass effect */
+  .linea-main-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    transition: all 0.2s ease;
+  }
+
+  /* Primary Linea button - matches official site yellow button */
+  .linea-button-primary {
+    background: #FFF068;
+    color: var(--linea-navy);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+    font-family: 'Inter', sans-serif;
+    padding: 14px 28px;
+  }
+  
+  .linea-button-primary:hover {
+    background: #FFE045;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 240, 104, 0.4);
+  }
+  
+  .linea-button-primary:disabled {
+    background: #E0E0E0;
+    color: #999999;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Secondary button - matches official site style */
+  .linea-button-secondary {
+    background: #ffffff;
+    color: #1a1a1a;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    font-family: 'Inter', sans-serif;
+    padding: 12px 24px;
+  }
+  
+  .linea-button-secondary:hover {
+    background: #f8f8f8;
+    border-color: #d0d0d0;
+    transform: translateY(-1px);
+  }
+
+  /* Legacy cyan button for specific use cases */
+  .linea-button {
+    background: var(--linea-cyan);
+    color: var(--linea-navy);
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    font-family: 'Inter', sans-serif;
+    padding: 12px 24px;
+  }
+  
+  .linea-button:hover {
+    background: var(--linea-cyan-light);
+    transform: translateY(-1px);
+  }
+
+  /* Linea inputs - subtle glass style for main interface */
+  .linea-input {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 14px 16px;
+    color: white;
+    outline: none;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .linea-input:focus {
+    border-color: var(--linea-cyan);
+    box-shadow: 0 0 0 3px rgba(97, 223, 255, 0.2);
+    background: rgba(255, 255, 255, 0.15);
+  }
+  
+  .linea-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  /* Special input for sensitive data */
+  .linea-input-sensitive {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 107, 107, 0.4);
+    border-radius: 8px;
+    padding: 14px 16px;
+    color: white;
+    outline: none;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .linea-input-sensitive:focus {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2);
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .linea-input-sensitive::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  /* Linea branding text */
+  .linea-text {
+    color: var(--linea-cyan);
+    font-weight: 600;
+  }
+  
+  .linea-text-large {
+    color: var(--linea-cyan);
+    font-weight: 700;
+    font-size: 3rem;
+    line-height: 1.1;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Status indicators */
+  .status-success {
+    background: rgba(76, 175, 80, 0.1);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    color: #4CAF50;
+    border-radius: 8px;
+  }
+  
+  .status-error {
+    background: rgba(244, 67, 54, 0.1);
+    border: 1px solid rgba(244, 67, 54, 0.3);
+    color: #F44336;
+    border-radius: 8px;
+  }
+  
+  .status-warning {
+    background: rgba(255, 152, 0, 0.1);
+    border: 1px solid rgba(255, 152, 0, 0.3);
+    color: var(--linea-orange);
+    border-radius: 8px;
+  }
+
+  /* Subtle glass components for inner elements */
   .glass-card {
-    @apply bg-white/10 backdrop-blur-lg border border-white/20 shadow-2xl;
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(8px);
+    transition: all 0.2s ease;
+    color: white;
   }
   
   .glass-input {
-    @apply bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/60 focus:outline-none focus:border-white/40 focus:bg-white/10 transition-all duration-300;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 14px 16px;
+    color: white;
+    outline: none;
+    transition: all 0.2s ease;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .glass-input:focus {
+    border-color: var(--linea-cyan);
+    box-shadow: 0 0 0 3px rgba(97, 223, 255, 0.2);
+    background: rgba(255, 255, 255, 0.15);
+  }
+  
+  .glass-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
   }
   
   .gradient-border {
-    @apply relative p-0.5 rounded-2xl;
-    background: linear-gradient(135deg, #61E8E1, #9333EA, #F59E0B);
+    background: linear-gradient(135deg, var(--linea-cyan), var(--linea-yellow), var(--linea-orange));
+    border-radius: 12px;
+    padding: 2px;
   }
   
   .gradient-border-inner {
-    @apply bg-gray-900/90 rounded-xl backdrop-blur-lg;
+    background: var(--linea-navy);
+    border-radius: 10px;
   }
   
   .linea-gradient {
-    background: linear-gradient(135deg, #61E8E1 0%, #9333EA 50%, #F59E0B 100%);
+    background: var(--linea-cyan);
+  }
+
+
+  /* Animations */
+  
+  @keyframes linea-slide-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .linea-float {
+    animation: lineaFloat 4s ease-in-out infinite;
   }
   
-  .linea-text {
-    background: linear-gradient(135deg, #61E8E1 0%, #9333EA 50%, #F59E0B 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  .linea-slide-up {
+    animation: linea-slide-up 0.6s ease-out;
   }
 
-  .floating-orb {
-    position: absolute;
-    border-radius: 50%;
-    pointer-events: none;
-    animation: float 6s ease-in-out infinite;
+  /* Card hover effects - subtle like Linea design */
+  .linea-hover, .card-hover {
+    transition: all 0.2s ease;
   }
-
-  .floating-orb:nth-child(1) {
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #61E8E1, #9333EA);
-    top: 10%;
-    left: 10%;
-    animation-delay: 0s;
-    opacity: 0.6;
-  }
-
-  .floating-orb:nth-child(2) {
-    width: 80px;
-    height: 80px;
-    background: linear-gradient(135deg, #F59E0B, #EF4444);
-    top: 20%;
-    right: 15%;
-    animation-delay: 2s;
-    opacity: 0.4;
-  }
-
-  .floating-orb:nth-child(3) {
-    width: 40px;
-    height: 40px;
-    background: linear-gradient(135deg, #8B5CF6, #06B6D4);
-    bottom: 20%;
-    left: 20%;
-    animation-delay: 4s;
-    opacity: 0.5;
-  }
-
-  @keyframes float {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    50% { transform: translateY(-20px) rotate(180deg); }
-  }
-
-  .card-hover {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .card-hover:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  
+  .linea-hover:hover, .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+    border-color: rgba(0, 210, 255, 0.3);
   }
 
   .pulse-glow {
-    animation: pulseGlow 2s ease-in-out infinite alternate;
+    animation: linea-pulse 2s ease-in-out infinite;
   }
 
-  @keyframes pulseGlow {
-    0% { box-shadow: 0 0 20px rgba(97, 232, 225, 0.4); }
-    100% { box-shadow: 0 0 40px rgba(97, 232, 225, 0.8), 0 0 60px rgba(147, 51, 234, 0.4); }
+  @keyframes linea-pulse {
+    0%, 100% { 
+      box-shadow: 0 0 0 0 rgba(0, 210, 255, 0.4);
+    }
+    50% { 
+      box-shadow: 0 0 0 8px rgba(0, 210, 255, 0);
+    }
   }
 
   .step-line {
@@ -150,7 +327,7 @@
     right: -24px;
     width: 48px;
     height: 2px;
-    background: linear-gradient(90deg, rgba(97, 232, 225, 0.8), rgba(147, 51, 234, 0.8));
+    background: linear-gradient(90deg, var(--linea-cyan), rgba(0, 210, 255, 0.3));
     transform: translateY(-50%);
   }
 
@@ -159,18 +336,7 @@
   }
 
   .animate-slide-up {
-    animation: slideUp 0.6s ease-out forwards;
-  }
-
-  @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    animation: linea-slide-up 0.6s ease-out forwards;
   }
 
   .text-shadow {
@@ -179,8 +345,13 @@
   
   /* Responsive fixes */
   @media (max-width: 768px) {
+    body::before {
+      width: 40%;
+      opacity: 0.2;
+    }
+    
     .floating-orb {
-      display: none; /* Hide floating orbs on mobile for performance */
+      display: none;
     }
     
     .container {
@@ -192,7 +363,7 @@
       font-size: 3rem;
     }
     
-    .glass-card {
+    .linea-card, .glass-card {
       margin: 0.5rem;
     }
   }

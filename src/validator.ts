@@ -68,11 +68,33 @@ export class Validator {
   static validateGasPrice(gasPrice: string): void {
     try {
       const parsed = Number(gasPrice);
-      if (parsed <= 0 || parsed > 1000) {
-        throw new ValidationError('Gas price must be between 1 and 1000 Gwei');
+      if (isNaN(parsed)) {
+        throw new ValidationError('Gas price must be a valid number');
       }
-    } catch {
+      if (parsed < 0.001 || parsed > 1000) {
+        throw new ValidationError('Gas price must be between 0.001 and 1000 Gwei (Linea is a cheap L2)');
+      }
+    } catch (error) {
+      if (error instanceof ValidationError) throw error;
       throw new ValidationError('Invalid gas price format');
+    }
+  }
+
+  static validateTokenAmount(amount: string): void {
+    try {
+      const parsed = Number(amount);
+      if (isNaN(parsed)) {
+        throw new ValidationError('Token amount must be a valid number');
+      }
+      if (parsed <= 0) {
+        throw new ValidationError('Token amount must be greater than 0');
+      }
+      if (parsed > 1000000000) { // 1 billion max
+        throw new ValidationError('Token amount cannot exceed 1 billion tokens');
+      }
+    } catch (error) {
+      if (error instanceof ValidationError) throw error;
+      throw new ValidationError('Invalid token amount format');
     }
   }
 
