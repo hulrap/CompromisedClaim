@@ -1,0 +1,40 @@
+{
+  "name": "lxp-rescue-tool",
+  "version": "1.0.0",
+  "description": "Tool to rescue LXP tokens from compromised wallets using Linea bundle transactions",
+  "main": "dist/index.js",
+  "bin": {
+    "lxp-rescue": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "preview": "vite preview",
+    "lint": "eslint src/**/*.{ts,tsx}",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "ethers": "^6.8.1",
+    "axios": "^1.6.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "lucide-react": "^0.294.0",
+    "buffer": "^6.0.3",
+    "process": "^0.11.10"
+  },
+  "devDependencies": {
+    "@types/node": "^20.9.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@typescript-eslint/eslint-plugin": "^6.12.0",
+    "@typescript-eslint/parser": "^6.12.0",
+    "@vitejs/plugin-react": "^4.1.1",
+    "eslint": "^8.54.0",
+    "tailwindcss": "^3.3.6",
+    "typescript": "^5.3.2",
+    "vite": "^5.0.0"
+  },
+  "keywords": ["ethereum", "linea", "rescue", "bundle-transaction", "lxp"],
+  "author": "LXP Rescue Tool",
+  "license": "MIT"
+}
