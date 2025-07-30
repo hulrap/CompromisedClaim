@@ -125,7 +125,7 @@ export class AllocationService {
         };
       }
 
-      const claimData = await this.generateMerkleClaimData(merkleProof.amount, merkleProof.proof);
+      const claimData = await this.generateMerkleClaimData(merkleProof.amount, merkleProof.proof, walletAddress);
       
       return {
         amount: merkleProof.amount,
@@ -212,13 +212,19 @@ export class AllocationService {
     }
   }
 
-  private async generateMerkleClaimData(amount: bigint, proof: string[]): Promise<string> {
+  private async generateMerkleClaimData(amount: bigint, proof: string[], walletAddress: string): Promise<string> {
     const claimInterface = new ethers.Interface([
       SERVICE_CONFIG.CLAIM_CONFIG.MERKLE_CLAIM_SIGNATURE,
     ]);
 
     try {
-      return claimInterface.encodeFunctionData('claim', [amount, proof]);
+      // For Thirdweb claimERC20: claimERC20(address _token, address _receiver, uint256 _quantity, bytes32[] _proofs)
+      return claimInterface.encodeFunctionData('claimERC20', [
+        SERVICE_CONFIG.LINEA_TOKEN_CONTRACT, // _token
+        walletAddress, // _receiver
+        amount, // _quantity
+        proof // _proofs
+      ]);
     } catch (error) {
       throw new Error(`Failed to generate merkle claim data: ${(error as Error).message}`);
     }

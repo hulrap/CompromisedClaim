@@ -45,7 +45,7 @@ export const SERVICE_CONFIG = {
     
     // Function signatures for different claim contract types
     SIMPLE_CLAIM_SIGNATURE: 'claim(uint256 amount)',
-    MERKLE_CLAIM_SIGNATURE: 'claim(uint256 amount, bytes32[] calldata merkleProof)',
+    MERKLE_CLAIM_SIGNATURE: 'function claimERC20(address _token, address _receiver, uint256 _quantity, bytes32[] calldata _proofs)',
     CLAIM_ALL_SIGNATURE: 'claimAll()',
     
     // Settings

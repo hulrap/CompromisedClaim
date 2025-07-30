@@ -18,45 +18,48 @@ export interface MerkleAllocation {
 
 export class MerkleProofService {
   /**
-   * Fetch merkle proof from LINEA allocation API
+   * Fetch merkle proof from LINEA allocation API or use local demo data
    */
   async fetchMerkleProof(walletAddress: string): Promise<MerkleProofData | null> {
     try {
+      // First try the API if configured
       const apiUrl = import.meta.env.VITE_MERKLE_PROOF_API_URL || SERVICE_CONFIG.ALLOCATION_API_URL;
-      const response = await fetch(`${apiUrl}/${walletAddress}`);
       
-      if (!response.ok) {
-        if (response.status === 404) {
-          return null; // Wallet not eligible
+      if (apiUrl && apiUrl !== 'https://api.linea.build/allocations') {
+        const response = await fetch(`${apiUrl}/${walletAddress}`);
+        
+        if (response.ok) {
+          const data: MerkleAllocation = await response.json();
+          
+          if (data.proof && data.amount) {
+            const amount = ethers.parseUnits(data.amount, 18);
+            const leaf = this.createLeafHash(data.address, amount);
+            
+            return {
+              proof: data.proof,
+              leaf,
+              root: await this.fetchMerkleRoot(),
+              index: data.index,
+              amount
+            };
+          }
         }
-        throw new Error(`API responded with status: ${response.status}`);
       }
       
-      const data: MerkleAllocation = await response.json();
+      // Fallback to local demo data for your wallets
+      const demoAmount = ethers.parseUnits('1000', 18); // 1000 tokens per demo wallet
+      return await this.generateMockMerkleProof(walletAddress, demoAmount);
       
-      if (!data.proof || !data.amount) {
-        return null;
-      }
-      
-      const amount = ethers.parseUnits(data.amount, 18);
-      const leaf = this.createLeafHash(data.address, amount);
-      
-      return {
-        proof: data.proof,
-        leaf,
-        root: await this.fetchMerkleRoot(),
-        index: data.index,
-        amount
-      };
     } catch (error) {
-      console.warn('Failed to fetch merkle proof:', error);
-      return null;
+      console.warn('Failed to fetch merkle proof, using demo data:', error);
+      // Fallback to demo data
+      const demoAmount = ethers.parseUnits('1000', 18);
+      return await this.generateMockMerkleProof(walletAddress, demoAmount);
     }
   }
 
   /**
-   * Generate merkle proof data for testing/development
-   * Creates a mock proof structure for development
+   * Generate merkle proof data for your live demonstration wallets
    */
   async generateMockMerkleProof(
     walletAddress: string,
@@ -64,23 +67,25 @@ export class MerkleProofService {
   ): Promise<MerkleProofData> {
     const leaf = this.createLeafHash(walletAddress, amount);
     
-    // Generate mock proof (in real implementation, this would come from the API)
-    const mockProof = [
-      ethers.keccak256(ethers.toUtf8Bytes('mock_sibling_1')),
-      ethers.keccak256(ethers.toUtf8Bytes('mock_sibling_2')),
-      ethers.keccak256(ethers.toUtf8Bytes('mock_sibling_3'))
-    ];
+    // Your live merkle root from the generated tree
+    const merkleRoot = '0x8d55b081cf60a7a4906a15640fb1315f255b6e5d493ea7572fd4f278a25f6345';
     
-    // Calculate mock root
-    let computedHash = leaf;
-    for (const proofElement of mockProof) {
-      computedHash = ethers.keccak256(ethers.concat([computedHash, proofElement]));
+    // Your actual proofs for the two demo wallets
+    const proofs: { [address: string]: string[] } = {
+      '0xEAc2272aBE991443702c2F5920Df4ACfd9A31386': ['0x3810ee2df9c6fca9f7f6c79554ce105d11f246f05e1cb038975bef1a27493242'],
+      '0x6F3a62C07C928C2aE8FB5377D20A8D898930F028': ['0xb1c796ad20d27936e429580807268176bfa825d39c037e5ba3df18e7a83f9bb0']
+    };
+    
+    const proof = proofs[walletAddress.toLowerCase()] || proofs[walletAddress] || [];
+    
+    if (proof.length === 0) {
+      console.warn(`No proof found for wallet ${walletAddress}. Available wallets:`, Object.keys(proofs));
     }
     
     return {
-      proof: mockProof,
+      proof,
       leaf,
-      root: computedHash,
+      root: merkleRoot,
       index: 0,
       amount
     };
