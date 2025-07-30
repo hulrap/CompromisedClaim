@@ -75,4 +75,14 @@ export class Validator {
       throw new ValidationError('Invalid gas price format');
     }
   }
+
+  static validateContractAddress(address: string, contractType: string): void {
+    if (!address || !ethers.isAddress(address)) {
+      throw new ValidationError(`Invalid ${contractType} address format`);
+    }
+    
+    if (address === '0x0000000000000000000000000000000000000000') {
+      throw new ValidationError(`${contractType} address cannot be zero address`);
+    }
+  }
 }

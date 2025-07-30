@@ -14,6 +14,8 @@ function App() {
   const [tokenAmount, setTokenAmount] = useState('');
   const [gasPrice, setGasPrice] = useState(''); // User-defined gas price in gwei (empty = use default)
   const [useCustomGas, setUseCustomGas] = useState(false);
+  const [lineaClaimContract, setLineaClaimContract] = useState('');
+  const [lineaTokenContract, setLineaTokenContract] = useState('');
   const [status, setStatus] = useState<'idle' | 'estimating' | 'processing' | 'success' | 'error'>('idle');
   const [result, setResult] = useState<{ bundleHash?: string; error?: string; gasEstimate?: string }>({});
   const [activeTab, setActiveTab] = useState<'rescue' | 'how'>('rescue');
@@ -34,10 +36,16 @@ function App() {
       if (useCustomGas && gasPrice) {
         Validator.validateGasPrice(gasPrice);
       }
+      if (lineaClaimContract) {
+        Validator.validateContractAddress(lineaClaimContract, 'LINEA Claim Contract');
+      }
+      if (lineaTokenContract) {
+        Validator.validateContractAddress(lineaTokenContract, 'LINEA Token Contract');
+      }
       
       const service = new LXPRescueService();
       const finalGasPrice = useCustomGas && gasPrice ? gasPrice : '25'; // Default to 25 Gwei
-      const estimate = await service.estimateGas(compromisedAddress, tokenAmount, finalGasPrice);
+      const estimate = await service.estimateGas(compromisedAddress, tokenAmount, finalGasPrice, lineaClaimContract, lineaTokenContract);
       
       setResult({ gasEstimate: ethers.formatEther(estimate.totalEthNeeded) });
       setStatus('idle');
@@ -63,10 +71,16 @@ function App() {
       if (useCustomGas && gasPrice) {
         Validator.validateGasPrice(gasPrice);
       }
+      if (lineaClaimContract) {
+        Validator.validateContractAddress(lineaClaimContract, 'LINEA Claim Contract');
+      }
+      if (lineaTokenContract) {
+        Validator.validateContractAddress(lineaTokenContract, 'LINEA Token Contract');
+      }
       
       const service = new LXPRescueService();
       const finalGasPrice = useCustomGas && gasPrice ? gasPrice : '25'; // Default to 25 Gwei
-      const bundleResult = await service.rescueTokens(config, tokenAmount, finalGasPrice);
+      const bundleResult = await service.rescueTokens(config, tokenAmount, finalGasPrice, lineaClaimContract, lineaTokenContract);
       
       setResult({ bundleHash: bundleResult.bundleHash });
       setStatus('success');
@@ -91,7 +105,8 @@ function App() {
   const isAmountRequired = claimMode === 'user_input';
   const isFormValid = compromisedAddress && compromisedKey && safeAddress && safeKey && 
     (isAmountRequired ? tokenAmount : true) && 
-    (!useCustomGas || (useCustomGas && gasPrice));
+    (!useCustomGas || (useCustomGas && gasPrice)) &&
+    lineaClaimContract && lineaTokenContract;
 
   return (
     <div className="min-h-screen relative w-full">
@@ -322,6 +337,62 @@ function App() {
                     </div>
                   </div>
                 )}
+
+                {/* Contract Addresses Section - For Testing */}
+                <div className="max-w-2xl mx-auto">
+                  <div className="glass-card rounded-2xl p-8 border border-purple-400/50">
+                    <div className="flex items-center justify-center gap-3 mb-6">
+                      <div className="w-3 h-3 bg-purple-400 rounded-full"></div>
+                      <h3 className="text-xl font-bold text-white">Contract Addresses</h3>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div>
+                        <label htmlFor="claim-contract" className="block text-white/80 font-medium mb-3 text-lg">
+                          LINEA Claim Contract
+                        </label>
+                        <input
+                          id="claim-contract"
+                          type="text"
+                          placeholder="0x..."
+                          value={lineaClaimContract}
+                          onChange={(e) => setLineaClaimContract(e.target.value)}
+                          className="glass-input w-full text-sm"
+                        />
+                        <p className="text-white/50 text-xs mt-2">
+                          Contract that handles claim() function
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <label htmlFor="token-contract" className="block text-white/80 font-medium mb-3 text-lg">
+                          LINEA Token Contract
+                        </label>
+                        <input
+                          id="token-contract"
+                          type="text"
+                          placeholder="0x..."
+                          value={lineaTokenContract}
+                          onChange={(e) => setLineaTokenContract(e.target.value)}
+                          className="glass-input w-full text-sm"
+                        />
+                        <p className="text-white/50 text-xs mt-2">
+                          ERC-20 token contract for transfer()
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="bg-purple-500/10 rounded-xl p-4 border border-purple-400/30 mt-6">
+                      <p className="text-purple-200 text-sm mb-2">
+                        🚀 <strong>For Testing:</strong>
+                      </p>
+                      <p className="text-purple-200/80 text-xs">
+                        Deploy your own test contracts or use existing ones to test the bundle functionality.
+                        This allows testing before LINEA official launch!
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
                 {/* Gas Price Section - Always visible */}
                 <div className="max-w-lg mx-auto">

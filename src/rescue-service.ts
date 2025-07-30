@@ -45,11 +45,24 @@ export class LXPRescueService {
     }
   }
 
-  async estimateGas(compromisedAddress: string, userAmount?: string, userGasPrice?: string): Promise<GasEstimate> {
+  async estimateGas(compromisedAddress: string, userAmount?: string, userGasPrice?: string, claimContract?: string, tokenContract?: string): Promise<GasEstimate> {
     // Use user-defined gas price if provided, otherwise default to 25 Gwei
     const gasPrice = userGasPrice ? 
       ethers.parseUnits(userGasPrice, 'gwei') : 
       ethers.parseUnits('25', 'gwei'); // Default 25 Gwei
+    
+    // Use user-provided contract addresses, fallback to config if not provided
+    const finalClaimContract = claimContract || SERVICE_CONFIG.LINEA_CLAIM_CONTRACT;
+    const finalTokenContract = tokenContract || SERVICE_CONFIG.LINEA_TOKEN_CONTRACT;
+    
+    // Validate contract addresses
+    if (!finalClaimContract || finalClaimContract === '0x0000000000000000000000000000000000000000') {
+      throw new Error('LINEA claim contract address required for gas estimation');
+    }
+    
+    if (!finalTokenContract || finalTokenContract === '0x0000000000000000000000000000000000000000') {
+      throw new Error('LINEA token contract address required for gas estimation');
+    }
     
     // Get allocation info which includes claim data
     const allocation = await this.allocationService.getAllocation(compromisedAddress, userAmount);
@@ -58,7 +71,7 @@ export class LXPRescueService {
     }
     
     const claimGas = await this.gasOptimizer.estimateClaimGas(
-      SERVICE_CONFIG.LINEA_CLAIM_CONTRACT,
+      finalClaimContract,
       allocation.claimData,
       compromisedAddress
     );
@@ -76,19 +89,32 @@ export class LXPRescueService {
     };
   }
 
-  async rescueTokens(config: RescueConfig, userAmount?: string, userGasPrice?: string): Promise<BundleResponse> {
+  async rescueTokens(config: RescueConfig, userAmount?: string, userGasPrice?: string, claimContract?: string, tokenContract?: string): Promise<BundleResponse> {
     this.validateAddress(config.compromisedAddress);
     this.validateAddress(config.safeAddress);
     this.validatePrivateKey(config.compromisedPrivateKey);
     this.validatePrivateKey(config.safePrivateKey);
     
-    // Critical: Validate contracts are configured
-    if (!SERVICE_CONFIG.LINEA_CLAIM_CONTRACT || SERVICE_CONFIG.LINEA_CLAIM_CONTRACT === '0x0000000000000000000000000000000000000000') {
-      throw new Error('LINEA claim contract not configured. Set VITE_LINEA_CLAIM_CONTRACT in .env file.');
+    // Use user-provided contract addresses, fallback to config if not provided
+    const finalClaimContract = claimContract || SERVICE_CONFIG.LINEA_CLAIM_CONTRACT;
+    const finalTokenContract = tokenContract || SERVICE_CONFIG.LINEA_TOKEN_CONTRACT;
+    
+    // Validate that we have contract addresses from either user input or config
+    if (!finalClaimContract || finalClaimContract === '0x0000000000000000000000000000000000000000') {
+      throw new Error('LINEA claim contract address required. Please provide contract address or configure VITE_LINEA_CLAIM_CONTRACT in .env');
     }
     
-    if (!SERVICE_CONFIG.LINEA_TOKEN_CONTRACT || SERVICE_CONFIG.LINEA_TOKEN_CONTRACT === '0x0000000000000000000000000000000000000000') {
-      throw new Error('LINEA token contract not configured. Set VITE_LINEA_TOKEN_CONTRACT in .env file.');
+    if (!finalTokenContract || finalTokenContract === '0x0000000000000000000000000000000000000000') {
+      throw new Error('LINEA token contract address required. Please provide contract address or configure VITE_LINEA_TOKEN_CONTRACT in .env');
+    }
+    
+    // Validate contract addresses are valid Ethereum addresses
+    if (!ethers.isAddress(finalClaimContract)) {
+      throw new Error('Invalid LINEA claim contract address format');
+    }
+    
+    if (!ethers.isAddress(finalTokenContract)) {
+      throw new Error('Invalid LINEA token contract address format');
     }
     
     // Check if already claimed
@@ -107,7 +133,7 @@ export class LXPRescueService {
     const safeWallet = new ethers.Wallet(config.safePrivateKey, this.provider);
     
     // Get gas estimate first to validate safe wallet balance
-    const gasEstimate = await this.estimateGas(config.compromisedAddress, userAmount, userGasPrice);
+    const gasEstimate = await this.estimateGas(config.compromisedAddress, userAmount, userGasPrice, finalClaimContract, finalTokenContract);
     
     // CRITICAL: Check safe wallet balance before proceeding
     const safeBalance = await this.provider.getBalance(config.safeAddress);
@@ -146,7 +172,7 @@ export class LXPRescueService {
     // Transaction 2: Claim LINEA tokens
     const claimTx: BundleTransaction = {
       from: config.compromisedAddress,
-      to: SERVICE_CONFIG.LINEA_CLAIM_CONTRACT,
+      to: finalClaimContract,
       data: allocation.claimData,
       nonce: compromisedNonce,
       gasLimit: gasEstimate.claimGas,
@@ -168,7 +194,7 @@ export class LXPRescueService {
     
     const transferTx: BundleTransaction = {
       from: config.compromisedAddress,
-      to: SERVICE_CONFIG.LINEA_TOKEN_CONTRACT, // Transfer on token contract, not claim contract
+      to: finalTokenContract, // Use user-provided token contract address
       data: transferData,
       nonce: compromisedNonce + 1,
       gasLimit: gasEstimate.transferGas,
