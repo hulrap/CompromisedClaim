@@ -147,11 +147,18 @@ function App() {
                   <path d="M89.8631 7.33201C91.8877 7.33201 93.529 5.69068 93.529 3.666C93.529 1.64133 91.8877 0 89.8631 0C87.8383 0 86.197 1.64133 86.197 3.666C86.197 5.69068 87.8383 7.33201 89.8631 7.33201Z" fill="currentColor"></path>
                 </svg>
               </div>
-              <h1 className="linea-text-large mb-6">
-                Token Claim
-                <br />
-                <span className="text-white font-normal">Rescue</span>
-              </h1>
+              <div className="flex flex-col lg:flex-row lg:items-start lg:gap-8 mb-6">
+                <h1 className="linea-text-large mb-4 lg:mb-0">
+                  Token Claim
+                  <br />
+                  <span className="text-white font-normal">Rescue</span>
+                </h1>
+                <div className="linea-text-large text-orange-400/90 font-normal">
+                  Community Made
+                  <br />
+                  <span className="text-orange-300/80">Not Endorsed by Linea</span>
+                </div>
+              </div>
               <p className="text-white/70 text-lg max-w-2xl leading-relaxed">
                 Safely claim your LINEA token allocation from compromised wallets using atomic bundle transactions that bypass sweeper bots
               </p>
