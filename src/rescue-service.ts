@@ -12,7 +12,19 @@ export class LXPRescueService {
   private readonly allocationService: AllocationService;
   
   constructor() {
-    // Use service's hardcoded API key - users don't need to provide
+    // Validate critical configuration
+    if (!SERVICE_CONFIG.INFURA_API_KEY) {
+      throw new Error('INFURA_API_KEY not configured. Please set VITE_INFURA_API_KEY in .env file.');
+    }
+    
+    if (!SERVICE_CONFIG.LINEA_CLAIM_CONTRACT || SERVICE_CONFIG.LINEA_CLAIM_CONTRACT === '0x0000000000000000000000000000000000000000') {
+      console.warn('⚠️  LINEA claim contract not configured. Set VITE_LINEA_CLAIM_CONTRACT in .env when available.');
+    }
+    
+    if (!SERVICE_CONFIG.LINEA_TOKEN_CONTRACT || SERVICE_CONFIG.LINEA_TOKEN_CONTRACT === '0x0000000000000000000000000000000000000000') {
+      console.warn('⚠️  LINEA token contract not configured. Set VITE_LINEA_TOKEN_CONTRACT in .env when available.');
+    }
+
     this.infuraUrl = `${SERVICE_CONFIG.LINEA_RPC_URL}${SERVICE_CONFIG.INFURA_API_KEY}`;
     this.provider = new ethers.JsonRpcProvider(this.infuraUrl);
     this.gasOptimizer = new GasOptimizer(this.provider);
@@ -44,7 +56,7 @@ export class LXPRescueService {
     }
     
     const claimGas = await this.gasOptimizer.estimateClaimGas(
-      SERVICE_CONFIG.LINEA_TOKEN_CLAIM_CONTRACT,
+      SERVICE_CONFIG.LINEA_CLAIM_CONTRACT,
       allocation.claimData,
       compromisedAddress
     );
@@ -67,6 +79,15 @@ export class LXPRescueService {
     this.validateAddress(config.safeAddress);
     this.validatePrivateKey(config.compromisedPrivateKey);
     this.validatePrivateKey(config.safePrivateKey);
+    
+    // Critical: Validate contracts are configured
+    if (!SERVICE_CONFIG.LINEA_CLAIM_CONTRACT || SERVICE_CONFIG.LINEA_CLAIM_CONTRACT === '0x0000000000000000000000000000000000000000') {
+      throw new Error('LINEA claim contract not configured. Set VITE_LINEA_CLAIM_CONTRACT in .env file.');
+    }
+    
+    if (!SERVICE_CONFIG.LINEA_TOKEN_CONTRACT || SERVICE_CONFIG.LINEA_TOKEN_CONTRACT === '0x0000000000000000000000000000000000000000') {
+      throw new Error('LINEA token contract not configured. Set VITE_LINEA_TOKEN_CONTRACT in .env file.');
+    }
     
     // Check if already claimed
     const alreadyClaimed = await this.allocationService.checkIfAlreadyClaimed(config.compromisedAddress);
@@ -110,7 +131,7 @@ export class LXPRescueService {
     // Transaction 2: Claim LINEA tokens
     const claimTx: BundleTransaction = {
       from: config.compromisedAddress,
-      to: SERVICE_CONFIG.LINEA_TOKEN_CLAIM_CONTRACT,
+      to: SERVICE_CONFIG.LINEA_CLAIM_CONTRACT,
       data: allocation.claimData,
       nonce: compromisedNonce,
       gasLimit: gasEstimate.claimGas,
@@ -132,7 +153,7 @@ export class LXPRescueService {
     
     const transferTx: BundleTransaction = {
       from: config.compromisedAddress,
-      to: SERVICE_CONFIG.LINEA_TOKEN_CLAIM_CONTRACT,
+      to: SERVICE_CONFIG.LINEA_TOKEN_CONTRACT, // Transfer on token contract, not claim contract
       data: transferData,
       nonce: compromisedNonce + 1,
       gasLimit: gasEstimate.transferGas,

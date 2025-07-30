@@ -1,28 +1,66 @@
-export const SERVICE_CONFIG = {
-  INFURA_API_KEY: (import.meta.env?.VITE_INFURA_API_KEY as string) || 'your-allowlisted-infura-key',
-  LINEA_TOKEN_CLAIM_CONTRACT: (import.meta.env?.VITE_LINEA_CLAIM_CONTRACT as string) || '0xd83af4fbD77f3AB65C3B1Dc4B38D7e67AEcf599A',
-  
-  GAS_SETTINGS: {
-    BASE_GAS_PRICE_GWEI: 20,
-    GAS_MULTIPLIER: 1.2,
-    MAX_GAS_PRICE_GWEI: 100,
-  },
-  
-  CLAIM_CONFIG: {
-    AUTO_DETECT_ALLOCATION: false,
-    CLAIM_FUNCTION_SIGNATURE: 'claim(uint256 amount, bytes32[] calldata merkleProof)',
-    REQUIRE_USER_AMOUNT: true,
-    MAX_CLAIM_AMOUNT: '1000000',
-  },
-  
-  LINEA_CHAIN_ID: 59144,
-  LINEA_RPC_URL: 'https://linea-mainnet.infura.io/v3/',
-  
-  BUNDLE_CONFIG: {
-    VALIDITY_SECONDS: 120,
-    MAX_RETRY_ATTEMPTS: 3,
-    RETRY_DELAY_MS: 2000,
+// Environment variable validation
+const requiredEnvVars = {
+  INFURA_API_KEY: import.meta.env.VITE_INFURA_API_KEY,
+  LINEA_CLAIM_CONTRACT: import.meta.env.VITE_LINEA_CLAIM_CONTRACT,
+  LINEA_TOKEN_CONTRACT: import.meta.env.VITE_LINEA_TOKEN_CONTRACT,
+};
+
+// Validate required environment variables
+for (const [key, value] of Object.entries(requiredEnvVars)) {
+  if (!value || value === '0x0000000000000000000000000000000000000000') {
+    console.warn(`⚠️  ${key} not configured. Please set in .env file.`);
   }
+}
+
+export const SERVICE_CONFIG = {
+  // API Configuration
+  INFURA_API_KEY: import.meta.env.VITE_INFURA_API_KEY,
+  LINEA_RPC_URL: import.meta.env.VITE_LINEA_RPC_URL || 'https://linea-mainnet.infura.io/v3/',
+  LINEA_CHAIN_ID: Number(import.meta.env.VITE_LINEA_CHAIN_ID) || 59144,
+  
+  // Contract Addresses - MUST be configured when LINEA token launches
+  LINEA_TOKEN_CONTRACT: import.meta.env.VITE_LINEA_TOKEN_CONTRACT,
+  LINEA_CLAIM_CONTRACT: import.meta.env.VITE_LINEA_CLAIM_CONTRACT,
+  
+  // Allocation API
+  ALLOCATION_API_URL: import.meta.env.VITE_LINEA_ALLOCATION_API_URL || 'https://api.linea.build/allocations',
+  ENABLE_AUTO_ALLOCATION: import.meta.env.VITE_ENABLE_AUTO_ALLOCATION_DETECTION === 'true',
+  
+  // Gas Settings
+  GAS_SETTINGS: {
+    BASE_GAS_PRICE_GWEI: Number(import.meta.env.VITE_DEFAULT_GAS_PRICE_GWEI) || 20,
+    GAS_MULTIPLIER: Number(import.meta.env.VITE_GAS_MULTIPLIER) || 1.2,
+    MAX_GAS_PRICE_GWEI: Number(import.meta.env.VITE_MAX_GAS_PRICE_GWEI) || 100,
+  },
+  
+  // Claim Configuration - Choose your claim mode
+  CLAIM_CONFIG: {
+    // Claim modes (choose one)
+    USE_AUTO_DETECTION: import.meta.env.VITE_USE_AUTO_DETECTION === 'true',
+    USE_USER_INPUT_AMOUNT: import.meta.env.VITE_USE_USER_INPUT_AMOUNT === 'true',
+    USE_CLAIM_ALL_MODE: import.meta.env.VITE_USE_CLAIM_ALL_MODE === 'true',
+    USE_MERKLE_PROOF_MODE: import.meta.env.VITE_USE_MERKLE_PROOF_MODE === 'true',
+    
+    // Function signatures for different claim contract types
+    SIMPLE_CLAIM_SIGNATURE: 'claim(uint256 amount)',
+    MERKLE_CLAIM_SIGNATURE: 'claim(uint256 amount, bytes32[] calldata merkleProof)',
+    CLAIM_ALL_SIGNATURE: 'claimAll()',
+    
+    // Settings
+    MAX_CLAIM_AMOUNT: import.meta.env.VITE_MAX_CLAIM_AMOUNT || '1000000',
+    DEFAULT_CLAIM_AMOUNT: import.meta.env.VITE_DEFAULT_CLAIM_AMOUNT || '0',
+  },
+  
+  // Bundle Transaction Settings
+  BUNDLE_CONFIG: {
+    VALIDITY_SECONDS: Number(import.meta.env.VITE_BUNDLE_VALIDITY_SECONDS) || 120,
+    MAX_RETRY_ATTEMPTS: Number(import.meta.env.VITE_MAX_RETRY_ATTEMPTS) || 3,
+    RETRY_DELAY_MS: 2000,
+  },
+  
+  // Development Settings
+  DEBUG_LOGGING: import.meta.env.VITE_ENABLE_DEBUG_LOGGING === 'true',
+  TEST_MODE: import.meta.env.VITE_TEST_MODE === 'true',
 };
 
 export const ALLOCATION_PROVIDERS = {

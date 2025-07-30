@@ -4,6 +4,7 @@ import { ethers } from 'ethers';
 import { LXPRescueService } from './rescue-service';
 import { Validator } from './validator';
 import { RescueConfig } from './types';
+import { SERVICE_CONFIG } from './config';
 
 function App() {
   const [compromisedAddress, setCompromisedAddress] = useState('');
@@ -65,7 +66,21 @@ function App() {
     }
   };
 
-  const isFormValid = compromisedAddress && compromisedKey && safeAddress && safeKey && tokenAmount;
+  // Determine what fields are required based on claim mode
+  const getClaimMode = () => {
+    if (SERVICE_CONFIG.CLAIM_CONFIG.USE_MERKLE_PROOF_MODE) return 'merkle_proof';
+    if (SERVICE_CONFIG.CLAIM_CONFIG.USE_CLAIM_ALL_MODE) return 'claim_all';
+    if (SERVICE_CONFIG.CLAIM_CONFIG.USE_AUTO_DETECTION) return 'auto_detect';
+    if (SERVICE_CONFIG.CLAIM_CONFIG.USE_USER_INPUT_AMOUNT) return 'user_input';
+    
+    // Fallback: if no mode is explicitly set, default to user input
+    return 'user_input';
+  };
+
+  const claimMode = getClaimMode();
+  const isAmountRequired = claimMode === 'user_input';
+  const isFormValid = compromisedAddress && compromisedKey && safeAddress && safeKey && 
+    (isAmountRequired ? tokenAmount : true);
 
   return (
     <div className="min-h-screen relative w-full">
@@ -112,7 +127,25 @@ function App() {
 
         {/* Main Content */}
         <div className="container mx-auto px-6 max-w-6xl">
-          {/* Warning Notice */}
+          {/* Claim Mode Notice */}
+          <div className="glass-card rounded-2xl p-8 mb-8 border-l-4 border-blue-400 card-hover">
+            <div className="flex items-start gap-6">
+              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center">
+                <Eye className="w-6 h-6 text-blue-400" />
+              </div>
+              <div>
+                <h3 className="text-white font-bold text-xl mb-3">Active Claim Mode: {claimMode.replace('_', ' ').toUpperCase()}</h3>
+                <p className="text-white/80 text-lg leading-relaxed">
+                  {claimMode === 'user_input' && 'You specify the exact amount of LINEA tokens to claim.'}
+                  {claimMode === 'auto_detect' && 'Token allocation automatically detected from LINEA API.'}
+                  {claimMode === 'claim_all' && 'All available LINEA tokens will be claimed automatically.'}
+                  {claimMode === 'merkle_proof' && 'Merkle proof-based claiming for verified allocations.'}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Security Notice */}
           <div className="glass-card rounded-2xl p-8 mb-12 border-l-4 border-amber-400 card-hover">
             <div className="flex items-start gap-6">
               <div className="flex-shrink-0 w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center">
@@ -234,32 +267,50 @@ function App() {
                   </div>
                 </div>
 
-                {/* Token Amount Section */}
-                <div className="max-w-md mx-auto">
-                  <div className="gradient-border">
-                    <div className="gradient-border-inner p-8 text-center">
-                      <div className="flex items-center justify-center gap-3 mb-6">
-                        <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
-                        <h3 className="text-xl font-bold text-white">Token Allocation</h3>
-                      </div>
-                      
-                      <div>
-                        <label htmlFor="token-amount" className="block text-white/80 font-medium mb-4 text-lg">LINEA Token Amount</label>
-                        <input
-                          id="token-amount"
-                          type="text"
-                          placeholder="1000.0"
-                          value={tokenAmount}
-                          onChange={(e) => setTokenAmount(e.target.value)}
-                          className="glass-input w-full text-xl text-center font-semibold"
-                        />
-                        <p className="text-white/60 mt-3">
-                          Enter your LINEA token allocation amount to claim
-                        </p>
+                {/* Token Amount Section - Conditional based on claim mode */}
+                {isAmountRequired && (
+                  <div className="max-w-md mx-auto">
+                    <div className="gradient-border">
+                      <div className="gradient-border-inner p-8 text-center">
+                        <div className="flex items-center justify-center gap-3 mb-6">
+                          <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
+                          <h3 className="text-xl font-bold text-white">Token Allocation</h3>
+                        </div>
+                        
+                        <div>
+                          <label htmlFor="token-amount" className="block text-white/80 font-medium mb-4 text-lg">LINEA Token Amount</label>
+                          <input
+                            id="token-amount"
+                            type="text"
+                            placeholder="1000.0"
+                            value={tokenAmount}
+                            onChange={(e) => setTokenAmount(e.target.value)}
+                            className="glass-input w-full text-xl text-center font-semibold"
+                          />
+                          <p className="text-white/60 mt-3">
+                            Enter your LINEA token allocation amount to claim
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                )}
+
+                {!isAmountRequired && (
+                  <div className="max-w-md mx-auto">
+                    <div className="glass-card rounded-2xl p-8 text-center border border-green-400/50">
+                      <div className="flex items-center justify-center gap-3 mb-4">
+                        <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                        <h3 className="text-xl font-bold text-white">Automatic Token Detection</h3>
+                      </div>
+                      <p className="text-white/80 text-lg">
+                        {claimMode === 'auto_detect' && 'Token allocation will be fetched from LINEA API'}
+                        {claimMode === 'claim_all' && 'All available tokens will be claimed automatically'}
+                        {claimMode === 'merkle_proof' && 'Allocation determined by merkle proof verification'}
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {/* Transaction Preview */}
                 <div className="bg-gradient-to-br from-white/5 to-white/10 rounded-3xl p-10 border border-white/20">

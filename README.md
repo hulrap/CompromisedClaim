@@ -89,15 +89,24 @@ npm run dev
 
 ### Configuration
 
-Update `src/config.ts`:
+Create a `.env` file based on `.env.example`:
 
-```typescript
-export const SERVICE_CONFIG = {
-  INFURA_API_KEY: 'your-allowlisted-api-key',
-  LINEA_TOKEN_CLAIM_CONTRACT: '0x...', // LINEA token contract
-  LINEA_RPC_URL: 'https://linea-mainnet.infura.io/v3/',
-  LINEA_CHAIN_ID: 59144
-};
+```bash
+cp .env.example .env
+```
+
+Configure required environment variables:
+
+```env
+# CRITICAL: Must be allowlisted by Infura for eth_sendBundle
+VITE_INFURA_API_KEY=your-allowlisted-infura-api-key
+
+# Will be updated when LINEA token launches (Q1 2025)
+VITE_LINEA_TOKEN_CONTRACT=0x0000000000000000000000000000000000000000
+VITE_LINEA_CLAIM_CONTRACT=0x0000000000000000000000000000000000000000
+
+# Optional: Enable when allocation API is available
+VITE_ENABLE_AUTO_ALLOCATION_DETECTION=false
 ```
 
 ## 📱 How to Use
@@ -211,10 +220,20 @@ npm run lint       # ESLint code checking
 
 ## ⚠️ Important Notes
 
-- **Infura API Key**: Must be allowlisted for `eth_sendBundle`
-- **LINEA Network**: Currently supports Linea mainnet only
+- **🚨 LINEA Token Not Yet Launched**: Token claim contracts will be available Q1 2025
+- **Infura API Key**: Must be allowlisted for `eth_sendBundle` on Linea
+- **Configuration Required**: Update contract addresses when LINEA token launches
 - **Gas Requirements**: Safe wallet needs ETH for gas fees
 - **Browser Support**: Modern browsers with Web3 support
+
+## 📋 Current Status
+
+- ✅ **Bundle Transaction Logic**: Implemented and ready
+- ✅ **Web Interface**: Modern React app with Tailwind CSS
+- ✅ **Security Features**: Client-side key handling, input validation
+- ⏳ **LINEA Token Contracts**: Waiting for official deployment (Q1 2025)
+- ⏳ **Allocation API**: Waiting for official endpoints
+- ⏳ **Merkle Proof Support**: Ready to implement when structure is announced
 
 ## 🤝 Contributing
 
